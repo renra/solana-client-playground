@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { JSX, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { clusterApiUrl } from "@solana/web3.js";
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import { clusterApiUrl, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { ConnectionProvider, useConnection, useWallet, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import "@solana/wallet-adapter-react-ui/styles.css";
 
@@ -16,38 +16,34 @@ const queryClient = new QueryClient({
 
 const endpoint = clusterApiUrl("devnet");
 
+const useAccountInfo = () => {
+  const { connection } = useConnection()
+  const { publicKey } = useWallet()
 
-// const { value: balance } = await rpc.getBalance(wallet).send();
-// console.log(`Balance: ${Number(balance) / LAMPORTS_PER_SOL} SOL`);
-
-// const useBalance = (walletAddress: string | undefined) => {
-//   return useQuery({
-//     queryKey: ['balance', walletAddress],
-//     queryFn: async () => {
-//       const wallet = address(walletAddress ?? '');
-//       return (await rpc.getBalance(wallet).send()).value
-//     },
-//     enabled: walletAddress !== undefined && walletAddress !== ''
-//   })
-// }
+  return useQuery({
+    queryKey: ['account-info', publicKey],
+    queryFn: async () => {
+      if(connection && publicKey) {
+        return connection.getAccountInfo(publicKey)
+      }
+    },
+    enabled: !!connection && !!publicKey
+  })
+}
 
 const MainInner = () : JSX.Element => {
-  const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
-  // const balance = useBalance(walletAddress)
-
-  // balance.isLoading
-      // { balance.isLoading && <div>...</div> }
-
-      // { balance.data &&  
-      //     <div>
-      //       Your balance is {`${Number(balance.data) / LAMPORTS_PER_SOL} SOL`}
-      //     </div>
-      // }
+  const accountInfo = useAccountInfo()
 
   return (
-    <div>
-      Hello!
-    </div>
+    <>
+      { accountInfo.isLoading &&
+          <div>...</div>
+      }
+
+      { accountInfo.data &&
+          <div>Your balance is {accountInfo.data.lamports / LAMPORTS_PER_SOL} SOL</div>
+      }
+    </>
   )
 }
 
