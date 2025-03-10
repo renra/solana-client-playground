@@ -12,7 +12,8 @@ const useRecentSignatures = () => {
         return connection.getSignaturesForAddress(publicKey)
       }
     },
-    enabled: !!connection && !!publicKey
+    enabled: !!connection && !!publicKey,
+    refetchInterval: 5000
   })
 }
 

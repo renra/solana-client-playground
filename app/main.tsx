@@ -7,6 +7,7 @@ import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-r
 import "@solana/wallet-adapter-react-ui/styles.css";
 import useAccountInfo from './useAccountInfo';
 import RecentTransactions from './RecentTransactions';
+import useRecentSignatures from './useRecentSignatures';
 
 const defaultSmartContractProgramId = '3YnxQPUGkyjcN3umsiNKpxMgYEoJRGZPQ7VTLsJUojJ7';
 const defaultMsg = { ping: {} }
@@ -25,8 +26,10 @@ const MainInner = () : JSX.Element => {
   const accountInfo = useAccountInfo()
 
   const { connection } = useConnection()
-  const { publicKey, sendTransaction, signTransaction } = useWallet()
+  const { publicKey, signTransaction } = useWallet()
   const [programId, setProgramId] = useState(defaultSmartContractProgramId)
+
+  const { refetch : refetchSignatures } = useRecentSignatures()
 
   const [parsedMsg, setParsedMsg] = useState<any>(defaultMsg)
   const [stringifiedMsg, setStringifiedMsg] = useState<string | undefined>(JSON.stringify(parsedMsg))
@@ -65,8 +68,8 @@ const MainInner = () : JSX.Element => {
         preflightCommitment: 'confirmed'
       })
 
-      alert(signature)
-      console.log("Transaction Signature:", signature);
+      alert(`The signature of your new transaction is ${signature}`)
+      refetchSignatures()
     } catch (error) {
       console.error("Transaction failed:", error);
     }
