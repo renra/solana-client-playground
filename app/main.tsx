@@ -129,7 +129,7 @@ const Main = () : JSX.Element => {
   return (
     <QueryClientProvider client={queryClient}>
       <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets}>
+        <WalletProvider wallets={wallets} autoConnect={true}>
           <WalletModalProvider>
             <WalletMultiButton />
 
